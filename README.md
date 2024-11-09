@@ -115,7 +115,7 @@ Contributions are welcome! Feel free to open an issue or a pull request.
 
 ## ✨ Authors
 
-- [@dyfault-eth](https://www.github.com/dyfault-eth)
+- [@justokaou](https://www.github.com/justokaou)
 - See the list of [contributors](https://github.com/dyfault-eth/setup-ts-node/contributors) who participated in this project.
 
 ---
