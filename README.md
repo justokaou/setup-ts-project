@@ -1,6 +1,6 @@
-# 🛠️ setup-ts-node.sh
+# 🛠️ setup-ts-project.sh
 
-`setup-ts-node.sh` is a Bash script to quickly set up a **Node.js** project with **TypeScript**. It automates project initialization, TypeScript configuration, additional library installation, and Git initialization.
+`setup-ts-project.sh` is a Bash script to quickly set up a **Node.js** project with **TypeScript**. It automates project initialization, TypeScript configuration, additional library installation, and Git initialization. It also supports creating a React TypeScript web application.
 
 ## 📋 Prerequisites
 
@@ -14,15 +14,15 @@ Ensure that you have the following tools installed on your system:
 Clone the repository or download the script directly:
 
 ```bash
-git clone https://github.com/your-username/setup-ts-node.git
-cd setup-ts-node
-chmod +x setup-ts-node.sh
+git clone https://github.com/your-username/setup-ts-project.git
+cd setup-ts-project
+chmod +x setup-ts-project.sh
 ```
 
 ## 💻 Usage
 
 ```bash
-./setup-ts-node.sh [-h|--help] [-d|--directory <directory_path>] [-p|--package-manager <npm|yarn>] [-l|--libraries <libraries>] [-c|--create-structure] [-g|--git]
+./setup-ts-project.sh [-h|--help] [-d|--directory <directory_path>] [-p|--package-manager <npm|yarn>] [-l|--libraries <libraries>] [-c|--create-structure] [-g|--git] [-w|--webapp]
 ```
 
 ### 🔍 Options
@@ -35,13 +35,14 @@ chmod +x setup-ts-node.sh
 | `-l`, `--libraries`     | Space-separated list of additional libraries to install   |
 | `-c`, `--create-structure` | Creates the basic project structure (`src/index.ts`)    |
 | `-g`, `--git`           | Initializes a Git repository and creates a `.gitignore` file |
+| `-w`, `--webapp`        | Creates a React TypeScript web application               |
 
 ## 🛠️ Examples
 
-### Example 1: Initialize a project with npm
+### Example 1: Initialize a basic TypeScript project with npm
 
 ```bash
-./setup-ts-node.sh -d my_project -p npm -c -g
+./setup-ts-project.sh -d my_project -p npm -c -g
 ```
 
 - Creates a project in the `my_project` directory
@@ -49,29 +50,28 @@ chmod +x setup-ts-node.sh
 - Creates the basic structure (`src/index.ts`)
 - Initializes a Git repository and adds a `.gitignore` file
 
-### Example 2: Initialize a project with yarn and install additional libraries
+### Example 2: Initialize a React TypeScript web application with yarn
 
 ```bash
-./setup-ts-node.sh -d my_project -p yarn -l "express lodash" -c -g
+./setup-ts-project.sh -d my_webapp -p yarn -w -l "react-router-dom styled-components" -g
 ```
 
-- Creates a project in the `my_project` directory
+- Creates a React TypeScript application in the `my_webapp` directory
 - Uses **yarn** as the package manager
-- Installs the libraries **express** and **lodash**
-- Creates the basic structure (`src/index.ts`)
+- Installs additional libraries: **react-router-dom** and **styled-components**
 - Initializes a Git repository and adds a `.gitignore` file
 
 ### Example 3: Display help
 
 ```bash
-./setup-ts-node.sh --help
+./setup-ts-project.sh --help
 ```
 
 - Displays the help message and available options
 
 ## 📂 Project Structure
 
-After running the script with the `-c` option, your project will have the following structure:
+After running the script with the `-c` option for a basic TypeScript project, your project will have the following structure:
 
 ```
 my_project/
@@ -82,6 +82,8 @@ my_project/
 ├── node_modules/
 └── .gitignore
 ```
+
+For a React TypeScript application (using the `-w` option), the structure is created by `create-react-app`.
 
 ## 📝 .gitignore
 
@@ -96,7 +98,7 @@ build
 
 ## ⚠️ Dependency Check
 
-The script checks for the required tools before starting. If **npm**, **yarn**, or **git** are not installed, the script will exit with an error message.
+The script checks for the required tools before starting. If **npm**, **yarn**, **npx** (for React web apps), or **git** are not installed, the script will exit with an error message.
 
 ## 📖 Documentation
 
@@ -104,6 +106,7 @@ The script checks for the required tools before starting. If **npm**, **yarn**, 
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 - [npm Documentation](https://docs.npmjs.com/)
 - [yarn Documentation](https://yarnpkg.com/getting-started)
+- [React Documentation](https://reactjs.org/docs/getting-started.html)
 
 ## 🛡️ License
 
@@ -115,9 +118,9 @@ Contributions are welcome! Feel free to open an issue or a pull request.
 
 ## ✨ Authors
 
-- **JustOkaou** - [GitHub Profile](https://github.com/justokaou)
-- See the list of [contributors](https://github.com/dyfault-eth/setup-ts-node/contributors) who participated in this project.
+- JustOkaou - [GitHub Profile](https://github.com/justokaou)
+- See the list of [contributors](https://github.com/your-username/setup-ts-project/contributors) who participated in this project.
 
 ---
 
-🎉 Thank you for using `setup-ts-node.sh`! Happy coding! 🚀
+🎉 Thank you for using `setup-ts-project.sh`! Happy coding! 🚀
