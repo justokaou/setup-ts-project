@@ -112,10 +112,12 @@ fi
 if [[ -z "$directory" ]]; then
     echo -e "${RED}Error: You need to specify a directory.${NC}"
     usage
+else
+    dir_name=$(basename "$directory")
 fi
 
 # Check if dir name is valid
-if [[ ! "$directory" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+if [[ ! "$dir_name" =~ ^[a-zA-Z0-9._-]+$ ]]; then
     echo -e "${RED}Error: Directory name contains invalid characters.${NC}"
     exit 1
 fi
