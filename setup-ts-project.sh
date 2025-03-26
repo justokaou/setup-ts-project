@@ -1,178 +1,165 @@
 #!/bin/bash
-# Define color variables for output formatting
+
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Exit the script on any error
+# Stop on error
 set -e
 
-# Function to display usage/help message
+# Help message
 usage() {
-    echo "Usage: $0 [-h|--help] [-d|--directory <directory_path>] [-p|--package-manager <npm|yarn>] [-l|--libraries <libraries>] [-c|--create-structure] [-g|--git] [-w|--webapp]"
-    echo "  -h, --help                  Display this help message"
-    echo "  -d, --directory             Path to the directory where the TypeScript project will be created."
-    echo "  -p, --package-manager       Package manager to use (npm or yarn). Default is npm."
-    echo "  -l, --libraries             Space-separated list of additional libraries to install."
-    echo "  -c, --create-structure      Create the basic project structure (src/index.ts)"
-    echo "  -g, --git                   Initialize Git and create a .gitignore file"
-    echo "  -w, --webapp                Create a React TypeScript web application"
+    echo "Usage: $0 [-d <directory>] [-p <package-manager>] [-l <libraries>] [-c] [-g] [-w <webapp>]"
+    echo "  -h, --help                Show help"
+    echo "  -d, --directory           Target directory for the project"
+    echo "  -p, --package-manager     Package manager (npm, yarn, pnpm, bun)"
+    echo "  -l, --libraries           Space-separated list of libraries to install"
+    echo "  -c, --create-structure    Create src/index.ts with tsconfig"
+    echo "  -g, --git                 Init Git & .gitignore"
+    echo "  -w, --webapp              Webapp template (vite, cra, next)"
     exit 1
 }
 
-install_libraries() {
-    echo -e "${YELLOW}Installing additional libraries: $libraries${NC}"
-    if [[ "$package_manager" == "npm" ]]; then
-        npm install $libraries
-    elif [[ "$package_manager" == "yarn" ]]; then
-        yarn add $libraries
-    fi
-}
-
-# Initialize variables with default values
+# Defaults
 directory=""
-package_manager="npm"  # Default to npm
-libraries=""
-webapp=false
+package_manager="npm"
+libraries=()
+create_structure=false
+git=false
+webapp=""
 
-# Display usage if no arguments are provided
-if [[ $# -eq 0 ]]; then
-    usage
-fi
-
-# Parse command-line arguments and handle errors for missing values
+# Parse args
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -h|--help) usage ;;
         -d|--directory)
-            # Check if the next argument is a value and not another option
-            if [[ -z "$2" || "$2" =~ ^- ]]; then
-                echo -e "${RED}Error: Option $1 requires a value.${NC}"
-                usage
-            fi
-            directory="$2"
-            shift
-            ;;
+            [[ -z "$2" || "$2" =~ ^- ]] && { echo -e "${RED}Missing value for $1${NC}"; usage; }
+            directory="$2"; shift ;;
         -p|--package-manager)
-            # Ensure the package manager option has a value
-            if [[ -z "$2" || "$2" =~ ^- ]]; then
-                echo -e "${RED}Error: Option $1 requires a value.${NC}"
-                usage
-            fi
-            package_manager="$2"
-            shift
-            ;;
+            [[ -z "$2" || "$2" =~ ^- ]] && { echo -e "${RED}Missing value for $1${NC}"; usage; }
+            package_manager="$2"; shift ;;
         -l|--libraries)
-            # Validate that the libraries option is followed by a value
-            if [[ -z "$2" || "$2" =~ ^- ]]; then
-                echo -e "${RED}Error: Option $1 requires a value.${NC}"
-                usage
-            fi
-            libraries="$2"
             shift
+            while [[ "$1" && "$1" != -* ]]; do
+                libraries+=("$1")
+                shift
+            done
+            continue
             ;;
-        -c|--create-structure) create_structure=true ;;  # Flag for creating basic structure
-        -g|--git) git=true ;;  # Flag for Git initialization
-        -w|--webapp) webapp=true ;;  # Flag for creating a React TypeScript webapp
-        *)
-            echo -e "${RED}Error: Invalid option $1${NC}"
-            usage
-            ;;
+        -c|--create-structure) create_structure=true ;;
+        -g|--git) git=true ;;
+        -w|--webapp)
+            [[ -z "$2" || "$2" =~ ^- ]] && { echo -e "${RED}Missing value for $1${NC}"; usage; }
+            webapp="$2"; shift ;;
+        *) echo -e "${RED}Unknown option $1${NC}"; usage ;;
     esac
     shift
 done
 
-# Check if npm, yarn, and git are installed before proceeding
-echo -e "${CYAN}Checking if all required tools are installed...${NC}"
-
-# Check if the specified package manager is installed
-if [[ "$package_manager" == "npm" ]]; then
-    echo -e "${CYAN}Checking if npm is installed...${NC}"
-    command -v npm >/dev/null 2>&1 || { echo -e "${RED}Error: npm is not installed. Please install it.${NC}"; exit 1; }
-    # Check for npx if webapp option is selected
-    if [[ "$webapp" == "true" ]]; then
-        echo -e "${CYAN}Checking if npx is installed...${NC}"
-        command -v npx >/dev/null 2>&1 || { echo -e "${RED}Error: npx is not installed. Please install it or update npm.${NC}"; exit 1; }
-    fi
-elif [[ "$package_manager" == "yarn" ]]; then
-    echo -e "${CYAN}Checking if yarn is installed...${NC}"
-    command -v yarn >/dev/null 2>&1 || { echo -e "${RED}Error: yarn is not installed. Please install it.${NC}"; exit 1; }
+# Normalize webapp
+if [[ -n "$webapp" ]]; then
+    case "$webapp" in
+        cra|create-react-app) webapp="create-react-app" ;;
+        vite|create-vite) webapp="create-vite" ;;
+        next|create-next-app) webapp="create-next-app" ;;
+        *) echo -e "${RED}Unknown webapp '$webapp'. Try: vite, cra, next.${NC}"; exit 1 ;;
+    esac
 fi
 
-# Check if git is installed if the git option is selected
-if [[ "$git" == "true" ]]; then
-    echo -e "${CYAN}Checking if git is installed...${NC}"
-    command -v git >/dev/null 2>&1 || { echo -e "${RED}Error: git is not installed. Please install it.${NC}"; exit 1; }
-fi
-
-# Validate the directory option
+# Check directory
 if [[ -z "$directory" ]]; then
-    echo -e "${RED}Error: You need to specify a directory.${NC}"
+    echo -e "${RED}You must specify a directory (-d).${NC}"
     usage
-else
-    dir_name=$(basename "$directory")
 fi
 
-# Check if dir name is valid
-if [[ ! "$dir_name" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-    echo -e "${RED}Error: Directory name contains invalid characters.${NC}"
+# Validate directory name
+dir_name=$(basename "$directory")
+[[ ! "$dir_name" =~ ^[a-zA-Z0-9._-]+$ ]] && { echo -e "${RED}Invalid directory name: $dir_name${NC}"; exit 1; }
+
+# Check package manager installed
+if ! command -v "$package_manager" >/dev/null 2>&1; then
+    echo -e "${RED}Error: '$package_manager' is not installed.${NC}"
     exit 1
 fi
 
-# Validate the package manager option
-if [[ "$package_manager" != "npm" && "$package_manager" != "yarn" ]]; then
-    echo -e "${RED}Error: Invalid package manager. Choose 'npm' or 'yarn'.${NC}"
-    exit 1
-fi
-
-# Create the directory if it does not exist
-if [[ ! -d "$directory" ]]; then
-    echo -e "${YELLOW}Directory does not exist. It will be created.${NC}"
-    mkdir -p "$directory"
-fi
-
-# Navigate to the project directory
-cd "$directory" || exit
-
-if [[ "$webapp" == "true" ]]; then
-    echo -e "${CYAN}Creating a React TypeScript web application...${NC}"
-    if [[ "$package_manager" == "npm" ]]; then
-        npx create-react-app . --template typescript
-    elif [[ "$package_manager" == "yarn" ]]; then
-        yarn create react-app . --template typescript
+# --- Functions ---
+install_libraries() {
+    if [[ ${#libraries[@]} -gt 0 ]]; then
+        echo -e "${YELLOW}Installing libraries: ${libraries[*]}${NC}"
+        case "$package_manager" in
+            npm|pnpm) $package_manager install "${libraries[@]}" ;;
+            yarn) yarn add "${libraries[@]}" ;;
+            bun) bun add "${libraries[@]}" ;;
+            *) echo -e "${RED}Unsupported package manager for libs.${NC}"; exit 1 ;;
+        esac
     fi
-    # Install additional libraries if specified
-    if [[ -n "$libraries" ]]; then
-        install_libraries
-    fi
-else
-    # Handle TypeScript project creation (without React)
-    echo -e "${BLUE}Creating TypeScript project in: $(pwd)${NC}"
-    echo -e "${BLUE}Using package manager: $package_manager${NC}"
+}
 
-    echo -e "${CYAN}Initializing TypeScript project...${NC}"
-    if [[ "$package_manager" == "npm" ]]; then
-        npm init -y
-        npm install typescript --save-dev
+install_typescript() {
+    echo -e "${CYAN}Installing TypeScript...${NC}"
+    case "$package_manager" in
+        npm|pnpm) $package_manager install typescript --save-dev ;;
+        yarn) yarn add typescript --dev ;;
+        bun) bun add -d typescript ;;
+        *) echo -e "${RED}Unsupported package manager for dev deps.${NC}"; exit 1 ;;
+    esac
+}
+
+run_tsc_init() {
+    if command -v npx &>/dev/null; then
         npx tsc --init
-    elif [[ "$package_manager" == "yarn" ]]; then
-        yarn init -y
-        yarn add typescript --dev
-        yarn tsc --init
+    else
+        $package_manager exec tsc --init
     fi
-    # Install additional libraries if specified
-    if [[ -n "$libraries" ]]; then
-        install_libraries
+}
+
+create_webapp() {
+    echo -e "${CYAN}Creating $webapp project in $(dirname "$directory")...${NC}"
+    cd "$(dirname "$directory")"
+
+    if [[ "$webapp" == "create-react-app" ]]; then
+        if [[ "$package_manager" == "yarn" ]]; then
+            yarn create react-app "$dir_name" --template typescript
+        else
+            npx create-react-app "$dir_name" --template typescript
+        fi
+    else
+        if [[ "$package_manager" == "pnpm" ]]; then
+            pnpm create "$webapp" "$dir_name" -- --template react-ts
+        elif [[ "$package_manager" == "yarn" ]]; then
+            case "$webapp" in
+                create-vite) yarn create vite "$dir_name" --template react-ts ;;
+                create-next-app) yarn create next-app "$dir_name" --typescript ;;
+                *) echo -e "${RED}Unsupported yarn webapp: $webapp${NC}"; exit 1 ;;
+            esac
+        else
+            $package_manager create "$webapp" "$dir_name"
+        fi
     fi
-    # Create basic project structure if the flag is set
+
+    cd "$directory"
+}
+
+# --- Webapp or TypeScript setup ---
+if [[ -n "$webapp" ]]; then
+    create_webapp
+    install_libraries
+else
+    echo -e "${CYAN}Initializing basic TypeScript project...${NC}"
+    mkdir -p "$directory"
+    cd "$directory"
+    $package_manager init -y
+    install_typescript
+    run_tsc_init
+
     if [[ "$create_structure" == "true" ]]; then
-        echo -e "${CYAN}Creating project structure...${NC}"
+        echo -e "${CYAN}Creating src/index.ts...${NC}"
         mkdir -p src
-        touch ./src/index.ts
-        echo -e "${CYAN}Configuring tsconfig.json...${NC}"
+        touch src/index.ts
         cat > tsconfig.json <<EOF
 {
   "compilerOptions": {
@@ -190,12 +177,13 @@ else
 }
 EOF
     fi
+
+    install_libraries
 fi
 
-
-# Initialize Git repository and create .gitignore if the flag is set
+# Git init
 if [[ "$git" == "true" ]]; then
-    echo -e "${CYAN}Initializing Git and creating .gitignore file...${NC}"
+    echo -e "${CYAN}Initializing Git...${NC}"
     git init
     cat > .gitignore <<EOF
 node_modules
@@ -203,15 +191,12 @@ node_modules
 dist
 build
 EOF
-    echo -e "${CYAN}.gitignore file created.${NC}"
-else
-    echo -e "${YELLOW}.gitignore already exists. Skipping creation.${NC}"
 fi
 
-
-# Display success message
-if [[ "$webapp" == "true" ]]; then
-    echo -e "${GREEN}React TypeScript web application successfully created in $(pwd). Happy coding!${NC}"
-else
-    echo -e "${GREEN}TypeScript project successfully created in $(pwd). Happy coding!${NC}"
-fi
+# Done
+echo -e "${GREEN}Project setup complete in $(pwd)${NC}"
+echo -e "${BLUE}Package Manager: $package_manager${NC}"
+[[ -n "$webapp" ]] && echo -e "${BLUE}Webapp Template: $webapp${NC}"
+[[ ${#libraries[@]} -gt 0 ]] && echo -e "${BLUE}Installed libs: ${libraries[*]}${NC}"
+[[ "$create_structure" == "true" ]] && echo -e "${BLUE}Structure: src/index.ts created${NC}"
+[[ "$git" == "true" ]] && echo -e "${BLUE}Git initialized${NC}"
