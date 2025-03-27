@@ -14,7 +14,7 @@ Ensure that you have the following tools installed on your system:
 Clone the repository or download the script directly:
 
 ```bash
-git clone https://github.com/your-username/setup-ts-project.git
+git clone https://github.com/justokaou/setup-ts-project.git
 cd setup-ts-project
 chmod +x setup-ts-project.sh
 ```
@@ -119,7 +119,7 @@ Contributions are welcome! Feel free to open an issue or a pull request.
 ## ✨ Authors
 
 - JustOkaou - [GitHub Profile](https://github.com/justokaou)
-- See the list of [contributors](https://github.com/your-username/setup-ts-project/contributors) who participated in this project.
+- See the list of [contributors](https://github.com/justokaou/setup-ts-project/contributors) who participated in this project.
 
 ---
 
